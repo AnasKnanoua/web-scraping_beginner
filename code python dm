@@ -1,0 +1,41 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://fbref.com/fr/pays/joueurs/FRA/Joueurs-de-football-de-France"
+reponse = requests.get(url)
+soup = BeautifulSoup(reponse.text,"html.parser")
+key = []
+data = ""
+mf = soup.findAll("p")
+
+name_date = []
+position= []
+club = []
+
+for data in mf:
+    if "MF" in data.get_text() and data.get_text()[:1]=="A": #S'il y a MF et A dans <p> :
+        res = data.get_text() #on met le texte dans "res"
+
+        key.append(res)
+
+        new = res.split("·")  #On crée des nouvelles listes, une par joueur
+
+        """
+        On va séparer les caractéristiques de la liste "new"...
+        """
+        new.append("Aucun")
+        one = new[0]
+        two = new[1]
+        three = new[2]
+        """
+        ... pour créer une liste pour les caractéristiques:
+        """
+        name_date.append(one)
+        position.append(two)
+        club.append(three)
+
+df = pd.DataFrame.from_dict( {"Noms       dates" : name_date, 'position' :position  , "club(s)" : club})
+df.to_csv("caractéristiques.csv")
+
+print("il y a "+str(len(key))+ " joueurs de foot ayant un prénom qui commence par un A et qui ont MF à la suite de leur nom.")
